@@ -1,0 +1,76 @@
+name: MLOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env: 
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  S3_BUCKET: ${{ vars.S3_BUCKET }}
+
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: setup python
+        uses: actions/actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: |
+          uv sync
+      
+      - name: Generate datset
+        run: | 
+          python generate_data.py
+      
+      - name: Train model
+        run: | 
+          python train.py
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: push model to s3
+        run: |
+          aws s3 cp models/churn_model.pkl s3://{{ env.S3_BUCKET}}/models/churn_model.pkl
+          echo "Model pushed to S3 is success"
+
+      - name: Update Inference.yaml with s3 model path
+        run: |
+          MODEL_URI="s3://${{ env.S3_BUCKET }}/models/churn_model.pkl"
+          sed -i "s|storageUri: .*|storageUri: $MODEL_URI|g" k8s/inference.yaml
+
+      - name: Commit updated inference.yaml
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add k8s/inference.yaml
+          git commit -m "Update model S3 path [skip ci]" || echo "No changes"
+          git push || echo "No changes to push"
+
+      
+
+      
+       
+      
+
+
+      
+
+      

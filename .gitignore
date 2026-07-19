@@ -7,8 +7,8 @@ __pycache__/
 *.so
 
 # Dvc files
-.dvc
-.dvc/
+*.dvc
+*.dvc/
 
 # Distribution / packaging
 .Python
