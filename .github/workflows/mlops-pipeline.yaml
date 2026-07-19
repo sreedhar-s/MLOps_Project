@@ -33,11 +33,11 @@ jobs:
       
       - name: Generate datset
         run: | 
-          python generate_data.py
+          uv run generate_data.py
       
       - name: Train model
         run: | 
-          python train.py
+          uv run train.py
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
