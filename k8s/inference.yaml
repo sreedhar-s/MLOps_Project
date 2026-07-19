@@ -7,4 +7,4 @@ spec:
   predictor:
     serviceAccountName: s3-sa
     sklearn:
-      storageUri: s3://mlops-s3-cicd-bucket/models/churn_model_f54f537b5a0f3161909d72d8c0eade639d12e0a7.pkl
+      storageUri: s3://mlops-s3-cicd-bucket/models/churn_model_f7cf667cc55f2723b01e9e58385b3b3247ba6f87.pkl
